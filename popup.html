@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dev Tab Manager</title>
+    <style>
+      body {
+        width: 600px;
+        padding: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+      .section-header {
+        font-weight: 600;
+        margin: 12px 0 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e1e4e8;
+      }
+      .window-container {
+        margin-bottom: 24px;
+        border: 1px solid #e1e4e8;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .window-header {
+        padding: 8px 12px;
+        background: #f6f8fa;
+        border-bottom: 1px solid #e1e4e8;
+        font-weight: bold;
+      }
+      .current-window {
+        border-color: #0366d6;
+      }
+      .current-window .window-header {
+        background: #f0f7ff;
+        color: #0366d6;
+      }
+      .tab-list {
+        padding: 8px;
+      }
+      .tab-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid #e1e4e8;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .tab-item:hover {
+        background-color: #f6f8fa;
+      }
+      .tab-checkbox {
+        margin-right: 8px;
+      }
+      .tab-favicon {
+        width: 16px;
+        height: 16px;
+        margin-right: 12px;
+      }
+      .tab-title {
+        flex-grow: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      button {
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: 1px solid #e1e4e8;
+        background: #f6f8fa;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e1e4e8;
+      }
+      .create-group-btn {
+        background: #0366d6;
+        color: white;
+        border: none;
+      }
+      .groups-section {
+        margin-bottom: 20px;
+      }
+      .group-item {
+        padding: 6px 12px;
+        border-radius: 12px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px;
+        min-width: 60px;
+      }
+
+      .group-status {
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .group-title {
+        unicode-bidi: plaintext;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .groups-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px;
+      }
+      /* Group colors */
+      .grey {
+        background: #888;
+      }
+      .blue {
+        background: #0366d6;
+      }
+      .red {
+        background: #dc3545;
+      }
+      .yellow {
+        background: #ffd43b;
+        color: black;
+      }
+      .green {
+        background: #28a745;
+      }
+      .pink {
+        background: #e83e8c;
+      }
+      .purple {
+        background: #6f42c1;
+      }
+      .cyan {
+        background: #17a2b8;
+      }
+
+      /* Dialog styles */
+      .group-dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .dialog-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 300px;
+      }
+      .group-name-input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #e1e4e8;
+        border-radius: 4px;
+      }
+      .color-options {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .color-option {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .color-option.selected {
+        border: 2px solid #0366d6;
+      }
+      .dialog-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <button id="groupTabs">Group Tabs</button>
+      <button id="refreshTabs">Refresh List</button>
+    </div>
+    <div class="groups-section">
+      <div class="section-header">Tab Groups</div>
+      <div id="groupList" class="groups-grid"></div>
+    </div>
+    <div id="windowsList"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

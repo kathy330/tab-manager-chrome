@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Dev Tab Manager",
+  "version": "1.0",
+  "description": "A tab manager designed specifically for anyone that need to managing tab",
+  "permissions": [
+    "tabs",
+    "storage",
+    "activeTab",
+    "windows",
+    "tabGroups",
+    "sessions"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
