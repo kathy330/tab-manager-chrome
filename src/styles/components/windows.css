@@ -1,0 +1,57 @@
+.window-container {
+  margin-bottom: 24px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.window-header {
+  padding: 8px 12px;
+  background: #f6f8fa;
+  border-bottom: 1px solid #e1e4e8;
+  font-weight: bold;
+}
+
+.current-window {
+  border-color: #0366d6;
+}
+
+.current-window .window-header {
+  background: #f0f7ff;
+  color: #0366d6;
+}
+
+.tab-list {
+  padding: 8px;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.tab-item:hover {
+  background-color: #f6f8fa;
+}
+
+.tab-checkbox {
+  margin-right: 8px;
+}
+
+.tab-favicon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+}
+
+.tab-title {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

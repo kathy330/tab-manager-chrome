@@ -1,0 +1,63 @@
+.groups-section {
+  margin-bottom: 20px;
+}
+
+.group-item {
+  padding: 6px 12px;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px;
+  min-width: 60px;
+}
+
+.group-status {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.group-title {
+  unicode-bidi: plaintext;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groups-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+}
+
+/* Group colors */
+.grey {
+  background: #888;
+}
+.blue {
+  background: #0366d6;
+}
+.red {
+  background: #dc3545;
+}
+.yellow {
+  background: #ffd43b;
+  color: black;
+}
+.green {
+  background: #28a745;
+}
+.pink {
+  background: #e83e8c;
+}
+.purple {
+  background: #6f42c1;
+}
+.cyan {
+  background: #17a2b8;
+}
