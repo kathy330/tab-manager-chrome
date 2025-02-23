@@ -1,5 +1,4 @@
-import { getCurrentWindow, getAllWindows } from "../utils/windowManager.js";
-import { focusTab } from "../utils/tabManager.js";
+import { focusTab, getTabInfo } from "../utils/tabManager.js";
 
 export class WindowList {
   constructor(containerId, onTabSelectionChange) {
@@ -8,27 +7,50 @@ export class WindowList {
     this.onTabSelectionChange = onTabSelectionChange;
   }
 
-  async initialize() {
-    try {
-      const currentWindow = await getCurrentWindow();
-      const windows = await getAllWindows();
-      this.render(windows, currentWindow);
-    } catch (error) {
-      console.error("Error initializing WindowList:", error);
+  handleTabCheckbox(checkbox, tabId) {
+    if (checkbox.checked) {
+      this.selectedTabs.add(tabId);
+    } else {
+      this.selectedTabs.delete(tabId);
+    }
+    if (this.onTabSelectionChange) {
+      this.onTabSelectionChange(this.selectedTabs);
     }
   }
 
-  render(windows, currentWindow) {
-    this.container.innerHTML = "";
+  createTabElement(tab, window) {
+    const tabElement = document.createElement("div");
+    tabElement.className = "tab-item";
 
-    windows.forEach((window, index) => {
-      const windowContainer = this.createWindowContainer(
-        window,
-        currentWindow,
-        index
-      );
-      this.container.appendChild(windowContainer);
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "tab-checkbox";
+    checkbox.checked = this.selectedTabs.has(tab.id);
+    checkbox.addEventListener("change", () =>
+      this.handleTabCheckbox(checkbox, tab.id)
+    );
+
+    const tabInfo = getTabInfo(tab);
+    const favicon = document.createElement("img");
+    favicon.className = "tab-favicon";
+    favicon.src = tabInfo.favIconUrl;
+    favicon.alt = "";
+
+    const title = document.createElement("div");
+    title.className = "tab-title";
+    title.textContent = tabInfo.title;
+
+    tabElement.appendChild(checkbox);
+    tabElement.appendChild(favicon);
+    tabElement.appendChild(title);
+
+    tabElement.addEventListener("click", (e) => {
+      if (e.target !== checkbox) {
+        focusTab(window.id, tab.id);
+      }
     });
+
+    return tabElement;
   }
 
   createWindowContainer(window, currentWindow, index) {
@@ -44,14 +66,6 @@ export class WindowList {
       window.id === currentWindow.id ? " (Current)" : ""
     }`;
 
-    const tabList = this.createTabList(window);
-
-    windowContainer.appendChild(windowHeader);
-    windowContainer.appendChild(tabList);
-    return windowContainer;
-  }
-
-  createTabList(window) {
     const tabList = document.createElement("div");
     tabList.className = "tab-list";
 
@@ -60,49 +74,36 @@ export class WindowList {
       tabList.appendChild(tabElement);
     });
 
-    return tabList;
+    windowContainer.appendChild(windowHeader);
+    windowContainer.appendChild(tabList);
+    return windowContainer;
   }
 
-  createTabElement(tab, window) {
-    const tabElement = document.createElement("div");
-    tabElement.className = "tab-item";
+  async render() {
+    try {
+      const currentWindow = await chrome.windows.getCurrent();
+      const windows = await chrome.windows.getAll({ populate: true });
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "tab-checkbox";
-    checkbox.checked = this.selectedTabs.has(tab.id);
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) {
-        this.selectedTabs.add(tab.id);
-      } else {
-        this.selectedTabs.delete(tab.id);
-      }
-      this.onTabSelectionChange(this.selectedTabs);
-    });
-
-    const favicon = document.createElement("img");
-    favicon.className = "tab-favicon";
-    favicon.src = tab.favIconUrl || "default-favicon.png";
-    favicon.alt = "";
-
-    const title = document.createElement("div");
-    title.className = "tab-title";
-    title.textContent = tab.title;
-
-    tabElement.appendChild(checkbox);
-    tabElement.appendChild(favicon);
-    tabElement.appendChild(title);
-
-    tabElement.addEventListener("click", (e) => {
-      if (e.target !== checkbox) {
-        focusTab(window.id, tab.id);
-      }
-    });
-
-    return tabElement;
+      this.container.innerHTML = "";
+      windows.forEach((window, index) => {
+        const windowContainer = this.createWindowContainer(
+          window,
+          currentWindow,
+          index
+        );
+        this.container.appendChild(windowContainer);
+      });
+    } catch (error) {
+      console.error("Error rendering windows:", error);
+    }
   }
 
   getSelectedTabs() {
     return this.selectedTabs;
+  }
+
+  clearSelection() {
+    this.selectedTabs.clear();
+    this.render(); // Re-render to update checkboxes
   }
 }

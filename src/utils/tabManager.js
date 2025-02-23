@@ -1,4 +1,4 @@
-// Functions for managing tabs
+// Core tab management functionality
 export const createTabGroup = async (tabIds, name, color) => {
   try {
     const groupId = await chrome.tabs.group({ tabIds });
@@ -21,4 +21,17 @@ export const focusTab = async (windowId, tabId) => {
     console.error("Error focusing tab:", error);
     throw error;
   }
+};
+
+export const getSelectedTabs = (selectedTabsSet) => {
+  return Array.from(selectedTabsSet);
+};
+
+export const getTabInfo = (tab) => {
+  return {
+    id: tab.id,
+    title: tab.title,
+    favIconUrl: tab.favIconUrl || "default-favicon.png",
+    groupId: tab.groupId,
+  };
 };
