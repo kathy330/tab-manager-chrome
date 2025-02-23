@@ -1,4 +1,4 @@
-import { focusTab, getTabInfo } from "../utils/tabManager.js";
+import { focusTab, getTabInfo } from "../utils/tabManager.ts";
 
 /**
  * WindowList class manages the display and interaction of Chrome windows and their tabs

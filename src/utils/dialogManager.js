@@ -1,4 +1,4 @@
-import { createTabGroup } from "./tabManager.js";
+import { createTabGroup } from "./tabManager.ts";
 
 /**
  * Shows a dialog for creating a new tab group

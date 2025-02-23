@@ -3,6 +3,13 @@
  * Provides methods for manipulating tabs and tab groups
  */
 
+interface TabInfo {
+  id: number;
+  title: string;
+  favIconUrl: string;
+  groupId: number;
+}
+
 /**
  * Creates a new tab group with specified properties
  * @param {number[]} tabIds - Array of tab IDs to include in the group
@@ -11,7 +18,11 @@
  * @returns {Promise<number>} Promise resolving to the new group ID
  * @throws {Error} If group creation fails
  */
-export const createTabGroup = async (tabIds, name, color) => {
+export const createTabGroup = async (
+  tabIds: number[],
+  name: string,
+  color: chrome.tabGroups.ColorEnum
+): Promise<number> => {
   try {
     const groupId = await chrome.tabs.group({ tabIds });
     await chrome.tabGroups.update(groupId, {
@@ -32,7 +43,10 @@ export const createTabGroup = async (tabIds, name, color) => {
  * @returns {Promise<void>} Promise that resolves when tab is focused
  * @throws {Error} If unable to focus tab
  */
-export const focusTab = async (windowId, tabId) => {
+export const focusTab = async (
+  windowId: number,
+  tabId: number
+): Promise<void> => {
   try {
     await chrome.windows.update(windowId, { focused: true });
     await chrome.tabs.update(tabId, { active: true });
@@ -47,7 +61,7 @@ export const focusTab = async (windowId, tabId) => {
  * @param {Set<number>} selectedTabsSet - Set of selected tab IDs
  * @returns {number[]} Array of selected tab IDs
  */
-export const getSelectedTabs = (selectedTabsSet) => {
+export const getSelectedTabs = (selectedTabsSet: Set<number>): number[] => {
   return Array.from(selectedTabsSet);
 };
 
@@ -60,11 +74,11 @@ export const getSelectedTabs = (selectedTabsSet) => {
  * @property {string} favIconUrl - URL of tab's favicon or default icon
  * @property {number} groupId - ID of tab's group (-1 if not grouped)
  */
-export const getTabInfo = (tab) => {
+export const getTabInfo = (tab: chrome.tabs.Tab): TabInfo => {
   return {
-    id: tab.id,
-    title: tab.title,
+    id: tab.id!,
+    title: tab.title || "Untitled",
     favIconUrl: tab.favIconUrl || "default-favicon.png",
-    groupId: tab.groupId,
+    groupId: tab.groupId || -1,
   };
 };
