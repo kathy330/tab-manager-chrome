@@ -5,22 +5,22 @@ import "./styles/components/windows.css";
 import "./styles/components/dialog.css";
 
 // Import components and utilities
-import { WindowList } from "./components/WindowList.js";
-import { showGroupDialog } from "./utils/dialogManager.js";
-import { updateCreateGroupButton } from "./utils/buttonManager.js";
+import { WindowList } from "./components/WindowList";
+import { showGroupDialog } from "./utils/dialogManager";
+import { updateCreateGroupButton } from "./utils/buttonManager";
 
 /**
  * Main popup initialization and event handling
  */
 document.addEventListener("DOMContentLoaded", function () {
-  let windowList;
+  let windowList: WindowList;
 
-  const initializeView = async () => {
+  const initializeView = async (): Promise<void> => {
     await windowList.render();
   };
 
   // Initialize components
-  windowList = new WindowList("windowsList", (selectedTabs) => {
+  windowList = new WindowList("windowsList", (selectedTabs: Set<number>) => {
     updateCreateGroupButton(selectedTabs, () => {
       showGroupDialog(selectedTabs, initializeView, () =>
         windowList.clearSelection()
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeView();
 
   // Set up refresh functionality
-  document
-    .getElementById("refreshTabs")
-    .addEventListener("click", initializeView);
+  const refreshButton = document.getElementById("refreshTabs");
+  refreshButton?.addEventListener("click", initializeView);
 });

@@ -1,17 +1,30 @@
-import { focusTab, getTabInfo } from "../utils/tabManager.ts";
+import { focusTab, getTabInfo } from "../utils/tabManager";
+
+type TabSelectionChangeCallback = (selectedTabs: Set<number>) => void;
 
 /**
  * WindowList class manages the display and interaction of Chrome windows and their tabs
  * Handles tab selection, window display, and tab focusing functionality
  */
 export class WindowList {
+  private container: HTMLElement;
+  private selectedTabs: Set<number>;
+  private onTabSelectionChange: TabSelectionChangeCallback;
+
   /**
    * Creates a WindowList instance
-   * @param {string} containerId - ID of the DOM element to contain the window list
-   * @param {Function} onTabSelectionChange - Callback function triggered when tab selection changes
+   * @param containerId - ID of the DOM element to contain the window list
+   * @param onTabSelectionChange - Callback function triggered when tab selection changes
    */
-  constructor(containerId, onTabSelectionChange) {
-    this.container = document.getElementById(containerId);
+  constructor(
+    containerId: string,
+    onTabSelectionChange: TabSelectionChangeCallback
+  ) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      throw new Error(`Container element with id ${containerId} not found`);
+    }
+    this.container = container;
     this.selectedTabs = new Set();
     this.onTabSelectionChange = onTabSelectionChange;
   }
@@ -19,37 +32,38 @@ export class WindowList {
   /**
    * Handles checkbox state changes for tab selection
    * Updates the selected tabs set and triggers the selection change callback
-   * @param {HTMLInputElement} checkbox - The checkbox element that was changed
-   * @param {number} tabId - The ID of the tab associated with the checkbox
+   * @param checkbox - The checkbox element that was changed
+   * @param tabId - The ID of the tab associated with the checkbox
    */
-  handleTabCheckbox(checkbox, tabId) {
+  private handleTabCheckbox(checkbox: HTMLInputElement, tabId: number): void {
     if (checkbox.checked) {
       this.selectedTabs.add(tabId);
     } else {
       this.selectedTabs.delete(tabId);
     }
-    if (this.onTabSelectionChange) {
-      this.onTabSelectionChange(this.selectedTabs);
-    }
+    this.onTabSelectionChange(this.selectedTabs);
   }
 
   /**
    * Creates a DOM element representing a tab
    * Includes checkbox for selection, favicon, and title
-   * @param {chrome.tabs.Tab} tab - Chrome tab object to create element for
-   * @param {chrome.windows.Window} window - Chrome window object containing the tab
-   * @returns {HTMLElement} The created tab element
+   * @param tab - Chrome tab object to create element for
+   * @param window - Chrome window object containing the tab
+   * @returns The created tab element
    */
-  createTabElement(tab, window) {
+  private createTabElement(
+    tab: chrome.tabs.Tab,
+    window: chrome.windows.Window
+  ): HTMLElement {
     const tabElement = document.createElement("div");
     tabElement.className = "tab-item";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "tab-checkbox";
-    checkbox.checked = this.selectedTabs.has(tab.id);
+    checkbox.checked = this.selectedTabs.has(tab.id!);
     checkbox.addEventListener("change", () =>
-      this.handleTabCheckbox(checkbox, tab.id)
+      this.handleTabCheckbox(checkbox, tab.id!)
     );
 
     const tabInfo = getTabInfo(tab);
@@ -66,10 +80,9 @@ export class WindowList {
     tabElement.appendChild(favicon);
     tabElement.appendChild(title);
 
-    // Add click handler to focus the tab when clicked (except checkbox)
     tabElement.addEventListener("click", (e) => {
       if (e.target !== checkbox) {
-        focusTab(window.id, tab.id);
+        focusTab(window.id!, tab.id!);
       }
     });
 
@@ -79,12 +92,16 @@ export class WindowList {
   /**
    * Creates a container element for a window and its tabs
    * Includes window header and all tabs in the window
-   * @param {chrome.windows.Window} window - Chrome window to create container for
-   * @param {chrome.windows.Window} currentWindow - Currently active Chrome window
-   * @param {number} index - Index of the window in the window list
-   * @returns {HTMLElement} The created window container element
+   * @param window - Chrome window to create container for
+   * @param currentWindow - Currently active Chrome window
+   * @param index - Index of the window in the window list
+   * @returns The created window container element
    */
-  createWindowContainer(window, currentWindow, index) {
+  private createWindowContainer(
+    window: chrome.windows.Window,
+    currentWindow: chrome.windows.Window,
+    index: number
+  ): HTMLElement {
     const windowContainer = document.createElement("div");
     windowContainer.className = "window-container";
     if (window.id === currentWindow.id) {
@@ -100,10 +117,12 @@ export class WindowList {
     const tabList = document.createElement("div");
     tabList.className = "tab-list";
 
-    window.tabs.forEach((tab) => {
-      const tabElement = this.createTabElement(tab, window);
-      tabList.appendChild(tabElement);
-    });
+    if (window.tabs) {
+      window.tabs.forEach((tab) => {
+        const tabElement = this.createTabElement(tab, window);
+        tabList.appendChild(tabElement);
+      });
+    }
 
     windowContainer.appendChild(windowHeader);
     windowContainer.appendChild(tabList);
@@ -113,9 +132,8 @@ export class WindowList {
   /**
    * Renders all Chrome windows and their tabs in the container
    * Gets current window state and creates all necessary DOM elements
-   * @returns {Promise<void>}
    */
-  async render() {
+  public async render(): Promise<void> {
     try {
       const currentWindow = await chrome.windows.getCurrent();
       const windows = await chrome.windows.getAll({ populate: true });
@@ -136,9 +154,9 @@ export class WindowList {
 
   /**
    * Returns the set of currently selected tab IDs
-   * @returns {Set<number>} Set of selected tab IDs
+   * @returns Set of selected tab IDs
    */
-  getSelectedTabs() {
+  public getSelectedTabs(): Set<number> {
     return this.selectedTabs;
   }
 
@@ -146,8 +164,8 @@ export class WindowList {
    * Clears all tab selections and re-renders the window list
    * Used after operations like group creation are completed
    */
-  clearSelection() {
+  public clearSelection(): void {
     this.selectedTabs.clear();
-    this.render(); // Re-render to update checkboxes
+    this.render();
   }
 }

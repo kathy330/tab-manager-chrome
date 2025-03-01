@@ -3,17 +3,20 @@
  * Shows the button when multiple tabs are selected (>1)
  * Removes the button when fewer tabs are selected
  *
- * @param {Set} selectedTabs - Set of currently selected tab IDs
- * @param {Function} onCreateClick - Callback function when create button is clicked
+ * @param selectedTabs - Set of currently selected tab IDs
+ * @param onCreateClick - Callback function when create button is clicked
  */
-export const updateCreateGroupButton = (selectedTabs, onCreateClick) => {
+export const updateCreateGroupButton = (
+  selectedTabs: Set<number>,
+  onCreateClick: () => void
+): void => {
   const existingButton = document.getElementById("createGroupBtn");
 
   if (selectedTabs.size > 1) {
     if (!existingButton) {
       const createBtn = createButton();
       createBtn.addEventListener("click", onCreateClick);
-      document.querySelector(".controls").appendChild(createBtn);
+      document.querySelector(".controls")?.appendChild(createBtn);
     }
   } else if (existingButton) {
     existingButton.remove();
@@ -22,9 +25,9 @@ export const updateCreateGroupButton = (selectedTabs, onCreateClick) => {
 
 /**
  * Creates a new group button element with standard styling
- * @returns {HTMLButtonElement} The created button element
+ * @returns The created button element
  */
-const createButton = () => {
+const createButton = (): HTMLButtonElement => {
   const createBtn = document.createElement("button");
   createBtn.id = "createGroupBtn";
   createBtn.className = "create-group-btn";

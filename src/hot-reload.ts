@@ -5,22 +5,25 @@
 
 /**
  * Recursively gets all files in a directory
- * @param {DirectoryEntry} dir - Chrome Extension directory entry
- * @returns {Promise<File[]>} Promise resolving to array of files
+ * @param dir - Chrome Extension directory entry
+ * @returns Promise resolving to array of files
  */
-const filesInDirectory = (dir) =>
+const filesInDirectory = (dir: DirectoryEntry): Promise<File[]> =>
   new Promise((resolve) =>
-    dir.createReader().readEntries((entries) =>
+    dir.createReader().readEntries((entries: Entry[]) =>
       Promise.all(
         entries
           .filter((e) => e.name[0] !== ".") // Ignore hidden files
           .map((e) =>
             e.isDirectory
-              ? filesInDirectory(e)
-              : new Promise((resolve) => e.file(resolve))
+              ? filesInDirectory(e as DirectoryEntry)
+              : new Promise<File>((resolve) => (e as FileEntry).file(resolve))
           )
       )
-        .then((files) => [].concat(...files))
+        .then((files) => {
+          // Properly flatten the array of files
+          return ([] as File[]).concat(...(files as (File | File[])[]));
+        })
         .then(resolve)
     )
   );
@@ -28,21 +31,21 @@ const filesInDirectory = (dir) =>
 /**
  * Creates a timestamp string based on file names and modification dates
  * Used to detect changes in the directory
- * @param {DirectoryEntry} dir - Chrome Extension directory entry
- * @returns {Promise<string>} Promise resolving to timestamp string
+ * @param dir - Chrome Extension directory entry
+ * @returns Promise resolving to timestamp string
  */
-const timestampForFilesInDirectory = (dir) =>
+const timestampForFilesInDirectory = (dir: DirectoryEntry): Promise<string> =>
   filesInDirectory(dir).then((files) =>
-    files.map((f) => f.name + f.lastModifiedDate).join()
+    files.map((f) => `${f.name}${f.lastModified}`).join()
   );
 
 /**
  * Reloads the active tab and the extension
  * Called when changes are detected
  */
-const reload = () => {
+const reload = (): void => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]) {
+    if (tabs[0]?.id) {
       chrome.tabs.reload(tabs[0].id);
     }
     chrome.runtime.reload();
@@ -52,10 +55,10 @@ const reload = () => {
 /**
  * Watches for changes in the extension directory
  * Compares timestamps to detect changes and triggers reload
- * @param {DirectoryEntry} dir - Chrome Extension directory entry
- * @param {string} [lastTimestamp] - Previous timestamp for comparison
+ * @param dir - Chrome Extension directory entry
+ * @param lastTimestamp - Previous timestamp for comparison
  */
-const watchChanges = (dir, lastTimestamp) => {
+const watchChanges = (dir: DirectoryEntry, lastTimestamp?: string): void => {
   timestampForFilesInDirectory(dir).then((timestamp) => {
     if (!lastTimestamp || lastTimestamp === timestamp) {
       setTimeout(() => watchChanges(dir, timestamp), 1000); // Check every second

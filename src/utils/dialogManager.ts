@@ -1,4 +1,14 @@
-import { createTabGroup } from "./tabManager.ts";
+import { createTabGroup } from "./tabManager";
+
+type ColorType =
+  | "grey"
+  | "blue"
+  | "red"
+  | "yellow"
+  | "green"
+  | "pink"
+  | "purple"
+  | "cyan";
 
 /**
  * Shows a dialog for creating a new tab group
@@ -7,16 +17,16 @@ import { createTabGroup } from "./tabManager.ts";
  * - Select a color for the group
  * - Confirm or cancel group creation
  *
- * @param {Set} selectedTabs - Set of tab IDs to be grouped
- * @param {Function} onGroupCreated - Callback function to execute after group is created
- * @param {Function} clearSelection - Function to clear the selected tabs
+ * @param selectedTabs - Set of tab IDs to be grouped
+ * @param onGroupCreated - Callback function to execute after group is created
+ * @param clearSelection - Function to clear the selected tabs
  */
 export const showGroupDialog = (
-  selectedTabs,
-  onGroupCreated,
-  clearSelection
-) => {
-  const colors = [
+  selectedTabs: Set<number>,
+  onGroupCreated: () => void,
+  clearSelection: () => void
+): void => {
+  const colors: ColorType[] = [
     "grey",
     "blue",
     "red",
@@ -26,15 +36,18 @@ export const showGroupDialog = (
     "purple",
     "cyan",
   ];
-  let selectedColor = "blue";
+  let selectedColor: ColorType = "blue";
 
   const dialog = createDialogElement(colors);
   document.body.appendChild(dialog);
 
   // Set up event listeners
-  setupColorSelection(dialog, (color) => (selectedColor = color));
+  setupColorSelection(dialog, (color: ColorType) => (selectedColor = color));
   setupDialogButtons(dialog, async () => {
-    const name = document.getElementById("groupName").value;
+    const nameElement = document.getElementById(
+      "groupName"
+    ) as HTMLInputElement;
+    const name = nameElement.value;
     const tabIds = Array.from(selectedTabs);
 
     try {
@@ -50,10 +63,10 @@ export const showGroupDialog = (
 
 /**
  * Creates the dialog DOM element with all necessary structure
- * @param {string[]} colors - Array of available color options
- * @returns {HTMLElement} The created dialog element
+ * @param colors - Array of available color options
+ * @returns The created dialog element
  */
-const createDialogElement = (colors) => {
+const createDialogElement = (colors: ColorType[]): HTMLElement => {
   const dialog = document.createElement("div");
   dialog.className = "group-dialog";
   dialog.innerHTML = `
@@ -78,31 +91,39 @@ const createDialogElement = (colors) => {
 
 /**
  * Sets up color selection functionality in the dialog
- * @param {HTMLElement} dialog - The dialog element
- * @param {Function} onColorSelected - Callback when color is selected
+ * @param dialog - The dialog element
+ * @param onColorSelected - Callback when color is selected
  */
-const setupColorSelection = (dialog, onColorSelected) => {
-  dialog.querySelector(".color-options").addEventListener("click", (e) => {
-    const colorDiv = e.target.closest(".color-option");
+const setupColorSelection = (
+  dialog: HTMLElement,
+  onColorSelected: (color: ColorType) => void
+): void => {
+  dialog.querySelector(".color-options")?.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    const colorDiv = target.closest(".color-option") as HTMLDivElement | null;
     if (colorDiv) {
       dialog
         .querySelectorAll(".color-option")
         .forEach((el) => el.classList.remove("selected"));
       colorDiv.classList.add("selected");
-      onColorSelected(colorDiv.dataset.color);
+      const color = colorDiv.dataset.color as ColorType;
+      onColorSelected(color);
     }
   });
 };
 
 /**
  * Sets up the dialog buttons (confirm/cancel) functionality
- * @param {HTMLElement} dialog - The dialog element
- * @param {Function} onConfirm - Callback for confirm button click
+ * @param dialog - The dialog element
+ * @param onConfirm - Callback for confirm button click
  */
-const setupDialogButtons = (dialog, onConfirm) => {
-  dialog.querySelector("#cancelGroup").addEventListener("click", () => {
+const setupDialogButtons = (
+  dialog: HTMLElement,
+  onConfirm: () => Promise<void>
+): void => {
+  dialog.querySelector("#cancelGroup")?.addEventListener("click", () => {
     dialog.remove();
   });
 
-  dialog.querySelector("#confirmGroup").addEventListener("click", onConfirm);
+  dialog.querySelector("#confirmGroup")?.addEventListener("click", onConfirm);
 };
